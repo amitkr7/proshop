@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { Form, Button } from 'react-bootstrap'
@@ -18,6 +19,7 @@ const ProductEditScreen = ({ match, history }) => {
   const [countInStock, setCountInStock] = useState(0)
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
+  const [uploading, setUploading] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -49,6 +51,30 @@ const ProductEditScreen = ({ match, history }) => {
       }
     }
   }, [product, dispatch, productId, history, successUpdate])
+
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0]
+    const formData = new FormData()
+    formData.append('image', file)
+    setUploading(true)
+
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+      //it will return data as a path
+      const { data } = await axios.post('/api/upload', formData, config)
+      //setting image path as data returned from axios request
+      setImage(data)
+      //After image upload ,we are setting uploading to false
+      setUploading(false)
+    } catch (error) {
+      console.error(error)
+      setUploading(false)
+    }
+  }
 
   const submitHandler = (e) => {
     e.preventDefault()
@@ -104,6 +130,12 @@ const ProductEditScreen = ({ match, history }) => {
                 placeholder='Enter Image URL'
                 value={image}
                 onChange={(e) => setImage(e.target.value)}></Form.Control>
+              <Form.File
+                id='image-file'
+                label='Choose file'
+                custom
+                onChange={uploadFileHandler}></Form.File>
+              {uploading && <Loader />}
             </Form.Group>
             <Form.Group controlId='brand'>
               <Form.Label>Brand:</Form.Label>
