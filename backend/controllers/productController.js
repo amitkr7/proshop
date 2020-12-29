@@ -21,7 +21,7 @@ const getProducts = asyncHandler(async (req, res) => {
     : {}
 
   //get the total count of products
-  const count = await Product.count({ ...keyword })
+  const count = await Product.countDocuments({ ...keyword })
   //.limit() to limit the number of product in a page .skip() to skip the product already shown
   const products = await Product.find({ ...keyword })
     .limit(pageSize)
